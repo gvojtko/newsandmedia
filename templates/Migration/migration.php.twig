@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Doctrine\DBAL\Schema\Schema;
+use App\Component\Doctrine\Migrations\AbstractMigration;
+
+class {{ migrationClassName }} extends AbstractMigration
+{
+    /**
+     * @param \Doctrine\DBAL\Schema\Schema $schema
+     */
+    public function up(Schema $schema): void
+    {
+    {% for sqlCommand in sqlCommands %}
+            $this->sql('{{ sqlCommand|raw }}');
+    {% endfor %}
+    }
+
+    /**
+    * @param \Doctrine\DBAL\Schema\Schema $schema
+    */
+    public function down(Schema $schema): void
+    {
+    }
+}

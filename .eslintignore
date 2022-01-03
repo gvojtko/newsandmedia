@@ -1,0 +1,7 @@
+/src/App/Resources/scripts/frontend/plugins
+/src/App/Resources/scripts/styleguide
+
+/node_modules
+
+# eslint-check-diff runs check with provided files that could contain even javascripts from tests folder
+/tests

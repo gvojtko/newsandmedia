@@ -1,0 +1,10 @@
+-   pathsToCheck:
+        - .
+    excludedPaths:
+        - ./vendor
+        - ./node_modules
+        - ./config/oauth2/parameters_oauth.yaml.dist
+    checkers:
+        -   pathToChecker: YamlStandards\Model\YamlIndent\YamlIndentChecker
+            parameters:
+                { indents: 4, indentsCommentsWithoutParent: default }

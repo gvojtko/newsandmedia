@@ -1,0 +1,24 @@
+# This file is auto-generated during the composer install
+parameters:
+    domain_url: https://www.newsandmedia.sk
+    database_host: postgres
+    database_port: null
+    database_name: newsmedia
+    database_user: root
+    database_password: root
+    elasticsearch_host: 'elasticsearch:9200'
+    redis_host: redis
+    mailer_transport: smtp
+    mailer_host: ~
+    mailer_user: ~
+    mailer_password: ~
+    mailer_disable_delivery: false
+    mailer_master_email_address: ~
+    mailer_delivery_whitelist: ~
+    secret: ThisTokenIsNotSoSecretChangeIt
+    trusted_proxies:
+        - 127.0.0.1
+    env(REDIS_PREFIX): ''
+    env(ELASTIC_SEARCH_INDEX_PREFIX): ''
+    microservice_product_search_url: 'http://microservice-product-search'
+    microservice_product_search_export_url: 'http://microservice-product-search-export'

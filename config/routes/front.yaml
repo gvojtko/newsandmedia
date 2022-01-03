@@ -1,0 +1,12 @@
+front_error_page_format:
+  path: /_error/{code}/{_format}/
+  defaults:
+    _controller: App\Controller\Front\ErrorController:errorPageAction
+  requirements:
+    code: \d+
+    _format: css|html|js|json|txt|xml
+
+front_homepage:
+  path: /
+  defaults:
+    _controller: App\Controller\Front\HomepageController:indexAction

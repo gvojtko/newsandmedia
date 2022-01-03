@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+    <!--[if IE 7 ]>    <html lang="{{ app.request.locale }}" class="ie7 no-js"> <![endif]-->
+    <!--[if IE 8 ]>    <html lang="{{ app.request.locale }}" class="ie8 no-js"> <![endif]-->
+    <!--[if IE 9 ]>    <html lang="{{ app.request.locale }}" class="ie9 no-js"> <![endif]-->
+    <!--[if (gt IE 9)|!(IE)]><!--> <html lang="{{ app.request.locale }}" class="no-js"> <!--<![endif]-->
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="X-UA-Compatible" content="IE=11" />
+
+        <title>{% block title %}{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}{% endblock %}">
+        {% block meta_robots %}
+            {% if app.environment == 'dev' %}
+                <meta name="robots" content="noindex,nofollow">
+            {% endif %}
+        {% endblock %}
+
+        {% block javascripts %}{% endblock %}
+    </head>
+
+    <body class="web {% block body_class %}{% endblock %}">
+
+    {% block before_html_body %}{% endblock %}
+
+    {% block html_body %}{% endblock %}
+
+    {% block after_html_body %}{% endblock %}
+
+    {% if app.environment == 'dev' %}
+        <script async src="//localhost:35729/livereload.js"></script>
+    {% endif %}
+
+    {% block javascripts_bottom %}{% endblock %}
+
+    </body>
+</html>

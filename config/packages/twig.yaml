@@ -1,0 +1,5 @@
+twig:
+    debug: "%kernel.debug%"
+    exception_controller: 'App\Controller\Front\ErrorController::showAction'
+    form_themes: ~
+    strict_variables: true

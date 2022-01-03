@@ -1,0 +1,15 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  newsandmedia.component.elasticsearch.tracer:
+    class: App\Component\Elasticsearch\Debug\ElasticsearchTracer
+
+  App\Component\Elasticsearch\Debug\ElasticsearchCollector:
+    tags:
+      - { name: 'data_collector', template: '/Debug/Elasticsearch/template.html.twig', id: 'newsandmedia.elasticsearch_collector' }
+
+  App\Component\Elasticsearch\Debug\ElasticsearchRequestCollection:

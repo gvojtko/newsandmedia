@@ -1,0 +1,58 @@
+parameters:
+    newsandmedia.content_dir_name: 'content'
+    newsandmedia.default_db_schema_filepath: '%newsandmedia.resources_dir%/database/schema.sql'
+    newsandmedia.css_version_filepath: '%newsandmedia.web_dir%/assets/cssVersion'
+    newsandmedia.data_fixtures.resources_dir: '%newsandmedia.root_dir%/src/DataFixtures/resources'
+    newsandmedia.domain_config_filepath: '%newsandmedia.root_dir%/config/domains.yaml'
+    newsandmedia.domain_images_dir: '/web%newsandmedia.domain_images_url_prefix%'
+    newsandmedia.domain_images_url_prefix: '/%newsandmedia.content_dir_name%/admin/images/domain'
+    newsandmedia.domain_urls_config_filepath: '%newsandmedia.root_dir%/config/domains_urls.yaml'
+    newsandmedia.error_pages_dir: '%newsandmedia.root_dir%/var/errorPages/'
+    newsandmedia.feed_dir: '/web%newsandmedia.feed_url_prefix%'
+    newsandmedia.feed_url_prefix: '/%newsandmedia.content_dir_name%/feeds/'
+    newsandmedia.filemanager_upload_dir: '%newsandmedia.web_dir%/%newsandmedia.filemanager_upload_web_dir%'
+    newsandmedia.filemanager_upload_web_dir: '%newsandmedia.content_dir_name%/wysiwyg'
+    newsandmedia.framework.root_dir: '%newsandmedia.root_dir%/vendor/newsandmedia/framework'
+    newsandmedia.front_design_image_url_prefix: /public/frontend/images/
+    newsandmedia.image_config_filepath: '%newsandmedia.root_dir%/config/images.yaml'
+    newsandmedia.image_dir: '/web%newsandmedia.image_url_prefix%'
+    newsandmedia.image_url_prefix: '/%newsandmedia.content_dir_name%/images/'
+    newsandmedia.javascript_sources_dir: '%newsandmedia.resources_dir%/scripts'
+    newsandmedia.javascript_url_prefix: /assets/scripts/
+    newsandmedia.log_stream: /tmp/log-pipe
+    newsandmedia.resources_dir: '%newsandmedia.root_dir%/src/Resources'
+    newsandmedia.root_dir: '%kernel.root_dir%/..'
+    newsandmedia.sitemaps_dir: '/web%newsandmedia.sitemaps_url_prefix%'
+    newsandmedia.sitemaps_url_prefix: '/%newsandmedia.content_dir_name%/sitemaps'
+    newsandmedia.uploaded_file_config_filepath: '%newsandmedia.root_dir%/config/uploaded_files.yaml'
+    newsandmedia.uploaded_file_dir: '/web%newsandmedia.uploaded_file_url_prefix%'
+    newsandmedia.uploaded_file_url_prefix: '/%newsandmedia.content_dir_name%/uploadedFiles/'
+    newsandmedia.web_dir: '%newsandmedia.root_dir%/web'
+    newsandmedia.vendor_dir: '%kernel.root_dir%/../vendor'
+    newsandmedia.js_form_validator_output_vendor_dir: '../vendor'
+    newsandmedia.data_fixtures_images.resources_dir: '%newsandmedia.data_fixtures.resources_dir%/images/'
+    newsandmedia.elasticsearch.structure_dir: '%newsandmedia.resources_dir%/definition/'
+    newsandmedia.gender_dir: '%newsandmedia.resources_dir%/gender/'
+    newsandmedia.gender_path: '%newsandmedia.resources_dir%/gender/nam_dict.txt'
+    newsandmedia.json_entrypoints_path: '%kernel.project_dir%/web/build/entrypoints.json'
+    newsandmedia.var_dir: '/var'
+    newsandmedia.router.domain.cache_dir: "%kernel.cache_dir%/routing/base"
+
+    newsandmedia.uploaded_public_file_dir: '/web%newsandmedia.uploaded_file_url_prefix%'
+    newsandmedia.uploaded_private_file_dir: '%newsandmedia.uploaded_file_url_prefix%'
+
+    newsandmedia.attachment_config_filepath: '%newsandmedia.root_dir%/config/attachments.yaml'
+    newsandmedia.domain_attachments_dir: '/web%newsandmedia.domain_attachments_url_prefix%'
+    newsandmedia.domain_attachments_url_prefix: '/%newsandmedia.content_dir_name%/admin/attachments/domain'
+    newsandmedia.attachment_url_prefix: '%newsandmedia.uploaded_file_url_prefix%attachments/'
+    newsandmedia.attachment_dir: '/web%newsandmedia.attachment_url_prefix%'
+    newsandmedia.attachment_public_dir: '%newsandmedia.attachment_dir%'
+    newsandmedia.attachment_private_dir: '%newsandmedia.attachment_url_prefix%'
+
+    newsandmedia.data_fixtures.resource_customers_filepath: '%newsandmedia.data_fixtures.resources_dir%/demo-data-customers.csv'
+    newsandmedia.data_fixtures.resource_products_filepath: '%newsandmedia.data_fixtures.resources_dir%/demo-data-products.csv'
+
+    newsandmedia.router.locale_router_filepath_mask: '%newsandmedia.root_dir%/config/newsandmedia-routing/routing_front_*.yaml'
+    newsandmedia.router.friendly_url_router_filepath: '%newsandmedia.root_dir%/config/newsandmedia-routing/routing_friendly_url.yaml'
+
+    newsandmedia.router.localized.cache_dir: "%kernel.cache_dir%/routing/localized"

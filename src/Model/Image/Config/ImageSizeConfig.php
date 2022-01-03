@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Model\Image\Config;
+
+use App\Model\Image\Config\Exception\ImageAdditionalSizeNotFoundException;
+
+class ImageSizeConfig
+{
+    /**
+     * @var string|null
+     */
+    protected $name;
+
+    /**
+     * @var int|null
+     */
+    protected $width;
+
+    /**
+     * @var int|null
+     */
+    protected $height;
+
+    /**
+     * @var bool
+     */
+    protected $crop;
+
+    /**
+     * @var string|null
+     */
+    protected $occurrence;
+
+    /**
+     * @var \App\Model\Image\Config\ImageAdditionalSizeConfig[]
+     */
+    protected $additionalSizes;
+
+    /**
+     * @param string|null $name
+     * @param int|null $width
+     * @param int|null $height
+     * @param bool $crop
+     * @param string|null $occurrence
+     * @param \App\Model\Image\Config\ImageAdditionalSizeConfig[] $additionalSizes
+     */
+    public function __construct($name, $width, $height, $crop, $occurrence, array $additionalSizes)
+    {
+        $this->name = $name;
+        $this->width = $width;
+        $this->height = $height;
+        $this->crop = $crop;
+        $this->occurrence = $occurrence;
+        $this->additionalSizes = $additionalSizes;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getWidth()
+    {
+        return $this->width;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getHeight()
+    {
+        return $this->height;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCrop()
+    {
+        return $this->crop;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOccurrence()
+    {
+        return $this->occurrence;
+    }
+
+    /**
+     * @return \App\Model\Image\Config\ImageAdditionalSizeConfig[]
+     */
+    public function getAdditionalSizes(): array
+    {
+        return $this->additionalSizes;
+    }
+
+    /**
+     * @param int $additionalIndex
+     * @return \App\Model\Image\Config\ImageAdditionalSizeConfig
+     */
+    public function getAdditionalSize(int $additionalIndex): ImageAdditionalSizeConfig
+    {
+        if (!isset($this->additionalSizes[$additionalIndex])) {
+            throw new ImageAdditionalSizeNotFoundException($this->name, $additionalIndex);
+        }
+
+        return $this->additionalSizes[$additionalIndex];
+    }
+}

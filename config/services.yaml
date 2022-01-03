@@ -1,0 +1,210 @@
+imports:
+    - { resource: paths.yaml }
+    - { resource: parameters_common.yaml }
+    - { resource: parameters.yaml }
+    - { resource: services/*.yaml }
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Controller\:
+        resource: '../src/Controller/'
+        public: true
+        tags: ['controller.service_arguments']
+
+    App\:
+        resource: '../src/**/*{Calculation,Facade,Factory,Generator,Handler,InlineEdit,Listener,Loader,Mapper,Parser,Provider,Recalculator,Registry,Repository,Resolver,Service,Scheduler,Subscriber,Transformer}.php'
+        exclude: '../src/{Command,Controller,DependencyInjection,Form,Migrations,Resources,Twig}'
+
+    doctrine.orm.default_entity_manager:
+        class: '%doctrine.orm.entity_manager.class%'
+        factory: ['%doctrine.orm.entity_manager.class%', create]
+        public: true
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            - '@doctrine.orm.default_configuration'
+
+    Doctrine\Common\Cache\ChainCache: ~
+
+    doctrine.orm.entity_manager.abstract:
+        synthetic: true
+        public: true
+
+    newsandmedia.doctrine.cache_driver.query_cache:
+        class: Doctrine\Common\Cache\RedisCache
+        calls:
+            - { method: setRedis, arguments: ['@snc_redis.doctrine_query'] }
+
+    newsandmedia.doctrine.cache_driver.metadata_cache:
+        class: Doctrine\Common\Cache\PhpFileCache
+        arguments:
+            - '%kernel.cache_dir%/metadata'
+
+    newsandmedia.cache_driver.annotations_cache:
+        class: Doctrine\Common\Cache\PhpFileCache
+        arguments:
+            - '%kernel.cache_dir%/annotations'
+
+    App\Component\Error\ExceptionController:
+        arguments:
+            - '@twig'
+            - '%kernel.debug%'
+
+    App\Component\Error\NotLogFakeHttpExceptionsErrorListener:
+        alias: exception_listener
+
+    exception_listener:
+        class: App\Component\Error\NotLogFakeHttpExceptionsErrorListener
+        tags:
+            - { name: 'kernel.event_subscriber' }
+            - { name: 'monolog.logger', channel: 'request' }
+        arguments:
+            - '%kernel.error_controller%'
+            - '@App\Component\Error\ErrorIdProvider'
+            - '@?logger'
+            - '%kernel.debug%'
+
+    App\Component\Error\ErrorPagesFacade:
+        arguments:
+            - '%newsandmedia.error_pages_dir%'
+
+    App\Component\Doctrine\DatabaseSchemaFacade:
+        arguments:
+            - '%newsandmedia.default_db_schema_filepath%'
+
+    App\Component\Doctrine\Migrations\DatabaseSchemaFacade:
+        arguments:
+            - '@Doctrine\ORM\EntityManagerInterface'
+            - '@App\Component\Doctrine\Migrations\SchemaDiffFilter'
+            - '@Doctrine\DBAL\Schema\Comparator'
+            - '@Doctrine\ORM\Tools\SchemaTool'
+
+    App\Component\Doctrine\Migrations\MigrationsFinder: ~
+
+    App\Component\Doctrine\Migrations\MigrationsLock:
+        arguments:
+            $migrationsLockFilePath: '%kernel.project_dir%/migrations-lock.yml'
+
+    Doctrine\Migrations\Finder\RecursiveRegexFinder: ~
+
+    Doctrine\Migrations\Finder\MigrationFinder:
+        alias: App\Component\Doctrine\Migrations\MigrationsFinder
+
+    App\Component\Doctrine\Migrations\MigrationsLocator:
+        arguments:
+            $relativeDirectory: 'Migrations'
+            $relativeNamespace: 'Migrations'
+            $applicationMigrationNamespace: '%doctrine_migrations.namespace%'
+            $applicationMigrationPath: '%doctrine_migrations.dir_name%'
+
+    App\Component\Doctrine\Migrations\SchemaDiffFilter: ~
+
+    App\Component\Doctrine\Cache\FallbackCacheFactory: ~
+
+    App\Component\Generator\MigrationsGenerator: ~
+
+    Doctrine\DBAL\Schema\Comparator: ~
+
+    Doctrine\ORM\Tools\SchemaTool:
+        arguments:
+            - '@Doctrine\ORM\EntityManagerInterface'
+
+    App\Component\Elasticsearch\IndexRegistry:
+        arguments:
+            $indexes: !tagged elasticsearch.index
+
+    App\Component\Elasticsearch\IndexDefinitionLoader:
+        arguments:
+            $indexDefinitionsDirectory: '%newsandmedia.elasticsearch.structure_dir%'
+            $indexPrefix: '%env(ELASTIC_SEARCH_INDEX_PREFIX)%'
+
+    App\Component\Redis\RedisFacade:
+        arguments:
+            $allClients: !tagged snc_redis.client
+            $persistentClients:
+                - '@snc_redis.global'
+                - '@snc_redis.session'
+
+    App\Component\Redis\RedisVersionsFacade:
+        arguments:
+            $globalClient: '@snc_redis.global'
+            $currentVersion: '%build-version%'
+
+    newsandmedia.component.elasticsearch.tracer:
+        class: Psr\Log\NullLogger
+
+    Elasticsearch\ClientBuilder:
+        class: Elasticsearch\ClientBuilder
+        factory: [App\Component\Elasticsearch\ElasticsearchClientFactory, create]
+        arguments: ['%env(default:elasticsearch_host:ELASTICSEARCH_HOST)%']
+        calls:
+            -   method: setTracer
+                arguments:
+                    - '@newsandmedia.component.elasticsearch.tracer'
+
+    Elasticsearch\Client:
+        class: Elasticsearch\Client
+        factory: ['@Elasticsearch\ClientBuilder', build]
+
+    App\Component\Environment\EnvironmentFileSetting:
+        arguments:
+            $environmentFileDirectory: '%newsandmedia.root_dir%'
+
+    App\Component\Cron\Config\CronConfig: ~
+
+    App\Component\Cron\CronModuleExecutor:
+        arguments:
+            $secondsTimeout: 240
+
+    App\Component\Cron\CronFacade:
+        arguments:
+            - '@monolog.logger.cron'
+
+    App\Component\Cron\CronFilter: ~
+
+    App\Component\Cron\CronModuleFactoryInterface:
+        alias: App\Component\Cron\CronModuleFactory
+
+    App\Model\Product\Elasticsearch\ProductIndex: ~
+
+    App\Component\Router\FriendlyUrl\FriendlyUrlDataFactoryInterface:
+        alias: App\Component\Router\FriendlyUrl\FriendlyUrlDataFactory
+
+    App\Component\Router\FriendlyUrl\FriendlyUrlFactoryInterface:
+        alias: App\Component\Router\FriendlyUrl\FriendlyUrlFactory
+
+    App\Component\EntityExtension\EntityNameResolver:
+        arguments:
+            - '%newsandmedia.entity_extension.map%'
+
+    App\Component\Router\CurrentDomainRouter:
+        tags:
+            - { name: router, priority: 70 }
+
+    App\Component\Router\DomainRouterFactory:
+        arguments:
+            $routerConfiguration: '%router.resource%'
+            $cacheDir: '%newsandmedia.router.domain.cache_dir%'
+
+    App\Component\Router\FriendlyUrl\FriendlyUrlRouterFactory:
+        arguments: ['%newsandmedia.router.friendly_url_router_filepath%']
+
+    Symfony\Component\Config\Loader\LoaderInterface:
+        alias: routing.loader
+
+    App\Component\Router\LocalizedRouterFactory:
+        arguments:
+            $localeRoutersResourcesFilepathMask: '%newsandmedia.router.locale_router_filepath_mask%'
+            $cacheDir: '%newsandmedia.router.localized.cache_dir%'
+
+    App\Component\Doctrine\QueryBuilderExtender: ~
+
+    App\Model\Product\Search\ProductElasticsearchConverter: ~
+
+    App\Model\Category\CategoryFactoryInterface:
+        alias: App\Model\Category\CategoryFactory
+
+    App\Model\Product\Listing\RequestToOrderingModeIdConverter: ~

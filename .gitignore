@@ -1,0 +1,11 @@
+/.idea
+/docs/generated
+/nbproject
+/node_modules
+/var/*
+!/var/.gitkeep
+/vendor
+/Gruntfile.js
+/.php_cs.cache
+/.docker-sync
+.DS_Store

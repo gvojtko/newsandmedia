@@ -1,0 +1,14 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\Command\:
+        resource: '../../src/Command'
+
+    App\Command\GenerateMigrationCommand:
+        arguments:
+            - '%newsandmedia.vendor_dir%'
+        tags:
+            - { name: console.command }

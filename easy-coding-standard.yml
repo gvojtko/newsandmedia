@@ -1,0 +1,9 @@
+services:
+    PhpCsFixer\Fixer\Strict\DeclareStrictTypesFixer: ~
+
+parameters:
+    exclude_files:
+        - '*/tests/App/Test/Codeception/_generated/AcceptanceTesterActions.php'
+        - '*/var/cache/*'
+
+    skip: ~

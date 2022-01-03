@@ -1,0 +1,19 @@
+{
+    "name": "newsandmedia",
+    "private": true,
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress",
+        "copy-assets": "./assets/js/bin/copyAssets.js",
+        "tests": "npm run tests:unit",
+        "tests:unit": "jest assets"
+    },
+    "preferGlobal": false,
+    "devDependencies": {
+    },
+    "dependencies": {
+
+    }
+}

@@ -1,0 +1,32 @@
+doctrine:
+    dbal:
+        driver: "%database_driver%"
+        host: "%database_host%"
+        port: "%database_port%"
+        dbname: "%database_name%"
+        user: "%database_user%"
+        password: "%database_password%"
+        charset: UTF8
+        # Explicitly define server version to overcome the need to connect to the database in early
+        # initialization phase (during DIC service creation) for auto-detecting version from the server.
+        # See \Doctrine\DBAL\Connection::getDatabasePlatformVersion().
+        server_version: "%database_server_version%"
+        types: ~
+
+    orm:
+        auto_generate_proxy_classes: false
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        metadata_cache_driver:
+            type: service
+            id: newsandmedia.doctrine.cache_driver.metadata_cache
+        query_cache_driver:
+            type: service
+            id: newsandmedia.doctrine.cache_driver.query_cache
+        auto_mapping: false
+        mappings:
+            App:
+                type: annotation
+                dir: '%newsandmedia.root_dir%/src/Model'
+                alias: App
+                prefix: App\Model
+                is_bundle: false

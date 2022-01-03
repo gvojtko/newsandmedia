@@ -1,0 +1,4 @@
+newsandmedia_shop_admin:
+  resource: "../../src/Controller/Admin/"
+  prefix: /admin
+  type: annotation

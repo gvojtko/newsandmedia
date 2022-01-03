@@ -1,0 +1,23 @@
+rest_product_list:
+  path: /api/product/list
+  defaults:
+    _controller: App\Controller\Rest\ProductController:listAction
+
+rest_product_list_by_category:
+  path: /api/product/list/{categoryId}
+  defaults:
+    _controller: App\Controller\Rest\ProductController:listByCategoryAction
+  requirements:
+    categoryId: \d+
+
+rest_product_detail:
+  path: /api/product/detail/{id}
+  defaults:
+    _controller: App\Controller\Rest\ProductController:detailAction
+  requirements:
+    id: \d+
+
+rest_product_search:
+  path: /api/product/search
+  defaults:
+    _controller: App\Controller\Rest\ProductController:searchAction

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Newsandmedia" default="list">
+
+    <property file="${project.basedir}/build/build.local.properties"/>
+
+    <property name="check-and-fix-annotations" value="false"/>
+    <property name="path.app" value="${path.root}/app"/>
+    <property name="path.bin" value="${path.vendor}/bin"/>
+    <property name="path.bin-console" value="${path.root}/bin/console"/>
+    <property name="path.root" value="${project.basedir}"/>
+    <property name="path.vendor" value="${path.root}/vendor"/>
+    <property name="path.var" value="${path.root}/var"/>
+    <property name="path.php.executable" value="php"/>
+    <property name="path.composer.executable" value="composer"/>
+    <property name="path.config" value="${path.root}/config"/>
+    <property name="phpstan.level" value="4"/>
+    <property name="path.npm.executable" value="npm"/>
+    <property name="path.assets" value="${path.root}/assets"/>
+
+    <if>
+        <os family="windows"/>
+        <then>
+            <property name="dev.null" value="NUL"/>
+        </then>
+        <else>
+            <property name="dev.null" value="/dev/null"/>
+        </else>
+    </if>
+
+    <target name="list" description="Hidden target to make Phing list all targets when called without an argument." hidden="true">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="phing"/>
+            <arg value="-l"/>
+        </exec>
+    </target>
+
+    <target name="maintenance-off" description="Turns the maintenance page off.">
+        <delete file="${path.root}/MAINTENANCE"/>
+    </target>
+
+    <target name="maintenance-on" description="Turns the maintenance page on.">
+        <touch file="${path.root}/MAINTENANCE"/>
+    </target>
+
+    <target name="npm-install-dependencies" description="Installs node modules dependencies." hidden="true">
+        <exec executable="${path.npm.executable}" dir="${path.root}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <target name="npm-export-translations" description="Exported used translations for javascripts." hidden="true">
+        <exec executable="${path.npm.executable}" dir="${path.root}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="run"/>
+            <arg value="trans"/>
+            <arg value="--"/>
+            <arg value="source-dir=${path.assets}/**/*.js"/>
+            <arg value="translations-dir=${path.root}/translations/*.po"/>
+        </exec>
+    </target>
+
+    <target name="npm" description="Build node modules.">
+        <phingcall target="npm-install-dependencies"/>
+        <phingcall target="npm-export-translations"/>
+
+        <exec executable="${path.npm.executable}" dir="${path.root}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="run"/>
+            <arg value="copy-assets"/>
+        </exec>
+
+        <exec executable="${path.npm.executable}" dir="${path.root}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="run"/>
+            <arg value="build"/>
+        </exec>
+    </target>
+
+    <target name="redis-check" description="Checks availability of Redis" hidden="true">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:redis:check-availability"/>
+        </exec>
+    </target>
+
+    <target name="security-check" description="Runs security checks for dependencies with known security vulnerabilities">
+        <exec executable="${path.composer.executable}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="security-check"/>
+        </exec>
+    </target>
+
+    <target name="prod-warmup" description="Warms up cache for production environment." hidden="true">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="cache:warmup"/>
+            <arg value="&#45;&#45;env=prod"/>
+        </exec>
+    </target>
+
+    <target name="production-protection" depends="environment-load" description="Asks user for confirmation when he or she wants to run a particular action in production environment" hidden="true">
+        <if>
+            <equals arg1="${environment}" arg2="prod"/>
+            <then>
+                <if>
+                    <not><isset property="production.confirm.action"/></not>
+                    <then>
+                        <input propertyName="production.confirm.action" validArgs="y,n" defaultValue="n" message="Warning! You are now in production environment and performing action that is not supposed to be ran in this environment! Are you sure you want to continue?"/>
+                    </then>
+                </if>
+                <if>
+                    <not><equals arg1="${production.confirm.action}" arg2="y"/></not>
+                    <then>
+                        <fail message="Terminated by user"/>
+                    </then>
+                </if>
+            </then>
+        </if>
+    </target>
+
+    <target name="environment-change" depends="production-protection" description="Change application environment and install composer dev-dependencies when development environment is selected.">
+        <input propertyName="change.environment" validArgs="dev, prod, test, acc" defaultValue="prod" message="Select environment you want to change to"/>
+        <phingcall target="maintenance-on"/>
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:environment:change"/>
+            <arg value="${change.environment}"/>
+        </exec>
+        <if>
+            <equals arg1="${change.environment}" arg2="prod"/>
+            <then>
+                <exec executable="${path.composer.executable}" logoutput="true" passthru="true" checkreturn="true">
+                    <arg value="install"/>
+                    <arg value="--no-dev"/>
+                    <arg value="--no-scripts"/>
+                </exec>
+            </then>
+            <else>
+                <phingcall target="composer-check"/>
+                <exec executable="${path.composer.executable}" logoutput="true" passthru="true" checkreturn="true">
+                    <arg value="install"/>
+                    <arg value="--no-scripts"/>
+                </exec>
+            </else>
+        </if>
+        <phingcall target="clean-cache"/>
+        <phingcall target="maintenance-off"/>
+    </target>
+
+    <target name="environment-load" description="Load application environment into Phing property." hidden="true">
+        <if>
+            <not><isset property="environment"/></not>
+            <then>
+                <exec command="php ${path.app}/getEnvironment.php" outputProperty="environment"/>
+
+                <property name="environment" value="${environment}"/>
+                <echo>Current environment: ${environment}</echo>
+            </then>
+        </if>
+    </target>
+
+    <target name="composer-check" description="Checks if Composer lock file is valid." hidden="true">
+        <exec executable="${path.composer.executable}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="validate"/>
+            <arg value="--no-check-all"/>
+        </exec>
+    </target>
+
+    <target name="composer-dev" depends="production-protection,composer-check" description="Installs dependencies for development.">
+        <exec executable="${path.composer.executable}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <target name="composer-prod" description="Installs dependencies for production.">
+        <exec executable="${path.composer.executable}" logoutput="true" passthru="true" checkreturn="true">
+            <arg value="install"/>
+            <arg value="--no-dev"/>
+        </exec>
+    </target>
+
+    <target name="error-pages-generate" depends="prod-warmup,redis-check" description="Generates error pages displayed in production environment.">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:error-page:generate-all"/>
+        </exec>
+    </target>
+
+    <target name="clean" depends="clean-cache-dir" description="Cleans up directories with cache and scripts which are generated on demand."/>
+
+    <target name="clean-cache" depends="clean-cache-dir,clean-redis" description="Cleans up all application cache."/>
+
+    <target name="clean-cache-dir" description="Cleans up directory with Symfony cache." hidden="true">
+        <delete failonerror="false" includeemptydirs="true">
+            <fileset dir="${path.var}/cache/">
+                <exclude name="/"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="clean-redis" depends="redis-check" description="Cleans up redis cache">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true" output="${dev.null}">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:redis:clean-cache"/>
+        </exec>
+    </target>
+
+    <target name="db-check-mapping" depends="clean-redis" description="Checks if ORM mapping is valid." hidden="true">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:migrations:check-mapping"/>
+        </exec>
+    </target>
+
+    <target name="db-check-schema" depends="clean-redis,db-check-mapping" description="Checks if database schema is satisfying ORM and returns a list of suggestions to fix it." hidden="true">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:migrations:check-schema"/>
+        </exec>
+    </target>
+
+    <target name="db-create" depends="production-protection" description="Creates database for application with required configuration.">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:database:create"/>
+        </exec>
+    </target>
+
+    <target name="db-migrations" description="Executes database migrations and checks schema.">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:migrations:migrate"/>
+        </exec>
+    </target>
+
+    <target name="db-migrations-count" description="Get count of database migrations to execute.">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:migrations:count"/>
+        </exec>
+    </target>
+
+    <target name="db-migrations-generate" depends="clean-redis,db-check-mapping" description="Generates migration file when DB schema is not satisfying ORM.">
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:migrations:generate"/>
+        </exec>
+    </target>
+
+    <target name="elasticsearch-export" description="Exports indexes data into elasticsearch.">
+        <property name="elasticsearch.index" value=""/>
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:elasticsearch:data-export"/>
+            <arg value="${elasticsearch.index}"/>
+        </exec>
+    </target>
+
+    <target name="elasticsearch-export-changed" description="Exports only changed indexes data into elasticsearch.">
+        <property name="elasticsearch.index" value=""/>
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:elasticsearch:changed-data-export"/>
+            <arg value="${elasticsearch.index}"/>
+        </exec>
+    </target>
+
+    <target name="elasticsearch-index-create" description="Creates indexes into elasticsearch." hidden="true">
+        <property name="elasticsearch.index" value=""/>
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:elasticsearch:indexes-create"/>
+            <arg value="${elasticsearch.index}"/>
+        </exec>
+    </target>
+
+    <target name="elasticsearch-index-delete" depends="production-protection" description="Deletes indexes from elasticsearch." hidden="true">
+        <property name="elasticsearch.index" value=""/>
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:elasticsearch:indexes-delete"/>
+            <arg value="${elasticsearch.index}"/>
+        </exec>
+    </target>
+
+    <target name="elasticsearch-index-migrate" description="Creates new indexes, reindex them from old one, deletes old indexes and add alias to the new one.">
+        <property name="elasticsearch.index" value=""/>
+        <exec executable="${path.php.executable}" passthru="true" checkreturn="true">
+            <arg value="${path.bin-console}"/>
+            <arg value="newsandmedia:elasticsearch:indexes-migrate"/>
+            <arg value="${elasticsearch.index}"/>
+        </exec>
+    </target>
+
+    <target name="elasticsearch-index-recreate" depends="production-protection, elasticsearch-index-delete, elasticsearch-index-create" description="Recreates indexes into elasticsearch (deletes existing indexes and creates new one)"/>
+
+
+</project>
